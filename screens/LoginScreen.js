@@ -38,10 +38,7 @@ export default function LoginScreen({ navigation }) {
 
     try {
       const result = await login(email, password);
-
       if (result.success) {
-        // Success - navigation handled by auth state changes
-        // or navigate directly
         navigation.reset({
           index: 0,
           routes: [{ name: "MainTabs" }],
@@ -58,7 +55,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <ImageBackground
-      source={require('../assets/download.jpg')}
+      source={require("../assets/download.jpg")}
       style={styles.background}
       blurRadius={3}
     >
@@ -69,7 +66,9 @@ export default function LoginScreen({ navigation }) {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.content}>
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue your food journey</Text>
+            <Text style={styles.subtitle}>
+              Sign in to continue your food journey
+            </Text>
 
             {error ? (
               <View style={styles.errorBox}>
@@ -79,7 +78,12 @@ export default function LoginScreen({ navigation }) {
             ) : null}
 
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#666" style={styles.icon} />
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color="#666"
+                style={styles.icon}
+              />
               <TextInput
                 style={styles.input}
                 placeholder="Email Address"
@@ -94,7 +98,12 @@ export default function LoginScreen({ navigation }) {
             </View>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#666"
+                style={styles.icon}
+              />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
@@ -108,10 +117,19 @@ export default function LoginScreen({ navigation }) {
               />
             </View>
 
+            {/* 🔹 Forgot Password Button */}
+            <TouchableOpacity
+              style={styles.forgotPasswordContainer}
+              onPress={() => navigation.navigate("ForgotPassword")}
+              disabled={isLoading}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={[
                 styles.loginButton,
-                isLoading && styles.disabledButton
+                isLoading && styles.disabledButton,
               ]}
               onPress={handleLogin}
               disabled={isLoading}
@@ -142,43 +160,43 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    width: '100%',
-    height: '100%'
+    width: "100%",
+    height: "100%",
   },
   container: {
-    flex: 1
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   content: {
-    padding: 24
+    padding: 24,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
-    color: '#1F2937'
+    color: "#1F2937",
   },
   subtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 32,
-    color: '#6B7280',
-    lineHeight: 22
+    color: "#6B7280",
+    lineHeight: 22,
   },
   inputContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     marginBottom: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     height: 56,
     borderWidth: 1,
-    borderColor: '#E5E7EB'
+    borderColor: "#E5E7EB",
   },
   icon: {
     marginRight: 12,
@@ -186,32 +204,41 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#1F2937',
-    height: '100%',
+    color: "#1F2937",
+    height: "100%",
   },
   errorBox: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: "#FEE2E2",
     padding: 16,
     borderRadius: 12,
     marginBottom: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderLeftWidth: 4,
-    borderLeftColor: '#DC2626'
+    borderLeftColor: "#DC2626",
   },
   errorText: {
-    color: '#DC2626',
+    color: "#DC2626",
     marginLeft: 8,
     flex: 1,
     fontSize: 14,
-    fontWeight: '500'
+    fontWeight: "500",
+  },
+  forgotPasswordContainer: {
+    alignSelf: "flex-end",
+    marginBottom: 16,
+  },
+  forgotPasswordText: {
+    color: "#FF6B6B",
+    fontSize: 15,
+    fontWeight: "600",
   },
   loginButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: "#FF6B6B",
     height: 56,
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 8,
     marginBottom: 24,
   },
@@ -219,23 +246,23 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   loginButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   signupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   signupText: {
-    color: '#6B7280',
+    color: "#6B7280",
     fontSize: 16,
   },
   signupLink: {
-    color: '#FF6B6B',
+    color: "#FF6B6B",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 4,
   },
 });

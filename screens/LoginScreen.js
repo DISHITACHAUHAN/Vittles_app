@@ -5,12 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ImageBackground,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../contexts/AuthContext";
@@ -77,6 +76,7 @@ export default function LoginScreen({ navigation }) {
               </View>
             ) : null}
 
+            {/* Email Input */}
             <View style={styles.inputContainer}>
               <Ionicons
                 name="mail-outline"
@@ -97,6 +97,7 @@ export default function LoginScreen({ navigation }) {
               />
             </View>
 
+            {/* Password Input */}
             <View style={styles.inputContainer}>
               <Ionicons
                 name="lock-closed-outline"
@@ -122,17 +123,17 @@ export default function LoginScreen({ navigation }) {
               style={styles.forgotPasswordContainer}
               onPress={() => navigation.navigate("ForgotPassword")}
               disabled={isLoading}
+              activeOpacity={0.7}
             >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
+            {/* Sign In Button */}
             <TouchableOpacity
-              style={[
-                styles.loginButton,
-                isLoading && styles.disabledButton,
-              ]}
+              style={[styles.loginButton, isLoading && styles.disabledButton]}
               onPress={handleLogin}
               disabled={isLoading}
+              activeOpacity={0.8}
             >
               {isLoading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
@@ -141,11 +142,13 @@ export default function LoginScreen({ navigation }) {
               )}
             </TouchableOpacity>
 
+            {/* Signup Redirect */}
             <View style={styles.signupContainer}>
               <Text style={styles.signupText}>Don't have an account? </Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Signup")}
                 disabled={isLoading}
+                activeOpacity={0.7}
               >
                 <Text style={styles.signupLink}>Create Account</Text>
               </TouchableOpacity>

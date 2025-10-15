@@ -87,7 +87,7 @@ export default function ImageCarousel() {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
+    <View style={styles.imageContainer}>
       <Image
         source={item.image}
         style={styles.image}

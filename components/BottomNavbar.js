@@ -100,4 +100,4 @@ const styles = StyleSheet.create({
   inactiveTabText: {
     color: "#64748b",
   },
-});
+})

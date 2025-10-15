@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext"; // Import your auth context
+import { useAuth } from "../contexts/AuthContext"; // Import your auth context
 import SearchBar from "./SearchBar";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -24,6 +25,7 @@ export default function TopNavbar({
   const navigation = useNavigation();
   const { colors, isDark } = useTheme();
   const { user } = useAuth(); // Get user from auth context
+  const { user } = useAuth(); // Get user from auth context
 
   const getResponsivePadding = () => {
     if (width < 375) return 20;
@@ -33,6 +35,16 @@ export default function TopNavbar({
   };
 
   const responsivePadding = getResponsivePadding();
+
+  // Function to get first name only
+  const getFirstName = () => {
+    if (user && user.name) {
+      // Split the full name and return only the first part
+      const firstName = user.name.split(' ')[0];
+      return firstName;
+    }
+    return "Guest"; // Default name if not logged in
+  };
 
   // Function to get first name only
   const getFirstName = () => {
@@ -107,13 +119,17 @@ const styles = StyleSheet.create({
   },
   container: {
     height: 100, // Reduced height since we have less margin
+    height: 100, // Reduced height since we have less margin
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start", // Changed to flex-start for better text alignment
+    paddingTop: 12,
     alignItems: "flex-start", // Changed to flex-start for better text alignment
     paddingTop: 12,
   },
   leftSection: {
     flex: 1,
+    justifyContent: "center",
     justifyContent: "center",
   },
   locationContainer: {
@@ -128,6 +144,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   greetingText: {
+    fontSize: 25,
     fontSize: 25,
     fontWeight: "700",
     letterSpacing: -0.5,
@@ -145,9 +162,26 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.2,
     marginBottom: 2,
+    marginBottom: 2, // Reduced from 4 to 2
+    color: "#F5DAA7", // Updated to match your inline style
+  },
+  cravingText: {
+    fontSize: 12,
+    fontWeight: "400",
+    letterSpacing: 0.2,
+    fontStyle: "italic",
+  },
+  orderText: {
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 0.2,
+    marginBottom: 2,
   },
   rightSection: {
     flexDirection: "row",
+    alignItems: "flex-start", // Align to top
+    gap: 4,
+    paddingTop: 4, // Add some top padding to align with text
     alignItems: "flex-start", // Align to top
     gap: 4,
     paddingTop: 4, // Add some top padding to align with text
@@ -186,10 +220,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   commonAvatar: {
+  commonAvatar: {
     width: 44,
     height: 44,
     borderRadius: 14,
     borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",

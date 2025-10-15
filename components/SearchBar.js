@@ -14,7 +14,6 @@ export default function SearchBar({
   searchQuery, 
   onSearchChange, 
   onClearSearch,
-  onFilterPress,
   compact = false,
   placeholder = "Search Eateries",
   autoFocus = false,
@@ -58,10 +57,6 @@ export default function SearchBar({
   const handleClearSearch = () => {
     onClearSearch?.();
     Keyboard.dismiss();
-  };
-
-  const handleFilterPress = () => {
-    onFilterPress?.();
   };
 
   const responsiveSize = getResponsiveSize();
@@ -139,10 +134,6 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   clearButton: {
-    padding: 2,
-    marginLeft: 8,
-  },
-  filterButton: {
     padding: 2,
     marginLeft: 8,
   },

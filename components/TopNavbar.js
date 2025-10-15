@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext"; // Import your auth context
 import SearchBar from "./SearchBar";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -22,6 +23,7 @@ export default function TopNavbar({
   const { width } = useWindowDimensions();
   const navigation = useNavigation();
   const { colors, isDark } = useTheme();
+  const { user } = useAuth(); // Get user from auth context
 
   const getResponsivePadding = () => {
     if (width < 375) return 20;
@@ -31,6 +33,16 @@ export default function TopNavbar({
   };
 
   const responsivePadding = getResponsivePadding();
+
+  // Function to get first name only
+  const getFirstName = () => {
+    if (user && user.name) {
+      // Split the full name and return only the first part
+      const firstName = user.name.split(' ')[0];
+      return firstName;
+    }
+    return "Guest"; // Default name if not logged in
+  };
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -49,8 +61,18 @@ export default function TopNavbar({
           {/* Left Section - Location & Greeting */}
           <View style={styles.leftSection}>
             
-            <Text style={[styles.greetingText, { color: "#FFFFFF" }]}>
-              Hello, John 👋
+            <Text style={[styles.greetingText, { color: "#E9B5D2" }]}>
+              Hello, {getFirstName()} 
+            </Text>
+            
+            {/* Added craving line */}
+            <Text style={[styles.cravingText, { color: "#FFFFFF" }]}>
+              Craving something delicious?
+            </Text>
+            
+            {/* Changed text */}
+            <Text style={[styles.orderText, { color: "#FFFFFF" }]}>
+              Don't wait! Order your food
             </Text>
           </View>
 
@@ -60,10 +82,10 @@ export default function TopNavbar({
               onPress={() => navigation.navigate("Profile")}
               style={styles.profileButton}
             >
-              <Image
-                source={{ uri: "https://i.pravatar.cc/150?img=3" }}
-                style={[styles.profileImage, { borderColor: "#FFFFFF" }]}
-              />
+              {/* Changed to common avatar */}
+              <View style={[styles.commonAvatar, { borderColor: "#FFFFFF" }]}>
+                <Ionicons name="person" size={20} color="#FFFFFF" />
+              </View>
             </TouchableOpacity>
 
             
@@ -99,14 +121,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#670D2F", // fallback base
   },
   container: {
-    height: 80,
+    height: 100, // Reduced height since we have less margin
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 8,
+    alignItems: "flex-start", // Changed to flex-start for better text alignment
+    paddingTop: 12,
   },
   leftSection: {
     flex: 1,
+    justifyContent: "center",
   },
   locationContainer: {
     flexDirection: "row",
@@ -120,14 +143,29 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   greetingText: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: "700",
     letterSpacing: -0.5,
+    marginBottom: 2, // Reduced from 4 to 2
+    color: "#F5DAA7", // Updated to match your inline style
+  },
+  cravingText: {
+    fontSize: 12,
+    fontWeight: "400",
+    letterSpacing: 0.2,
+    fontStyle: "italic",
+  },
+  orderText: {
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 0.2,
+    marginBottom: 2,
   },
   rightSection: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+    alignItems: "flex-start", // Align to top
+    gap: 4,
+    paddingTop: 4, // Add some top padding to align with text
   },
   iconButton: {
     width: 40,
@@ -162,11 +200,14 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
   },
-  profileImage: {
+  commonAvatar: {
     width: 44,
     height: 44,
     borderRadius: 14,
     borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   searchContainer: {
     paddingBottom: 16,

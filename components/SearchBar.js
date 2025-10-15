@@ -14,7 +14,6 @@ export default function SearchBar({
   searchQuery, 
   onSearchChange, 
   onClearSearch,
-  onFilterPress,
   compact = false,
   placeholder = "Search Restaurants",
   autoFocus = false,
@@ -58,10 +57,6 @@ export default function SearchBar({
   const handleClearSearch = () => {
     onClearSearch?.();
     Keyboard.dismiss();
-  };
-
-  const handleFilterPress = () => {
-    onFilterPress?.();
   };
 
   const responsiveSize = getResponsiveSize();
@@ -126,19 +121,7 @@ export default function SearchBar({
             color={colors.textSecondary} 
           />
         </TouchableOpacity>
-      ) : (
-        <TouchableOpacity 
-          onPress={handleFilterPress}
-          style={styles.filterButton}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons 
-            name="options-outline" 
-            size={responsiveSize.iconSize} 
-            color={colors.textSecondary} 
-          />
-        </TouchableOpacity>
-      )}
+      ) : null}
     </View>
   );
 }
@@ -163,10 +146,6 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   clearButton: {
-    padding: 2,
-    marginLeft: 8,
-  },
-  filterButton: {
     padding: 2,
     marginLeft: 8,
   },

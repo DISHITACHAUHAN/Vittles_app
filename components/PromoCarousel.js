@@ -87,7 +87,7 @@ export default function ImageCarousel() {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
+    <View style={styles.imageContainer}>
       <Image
         source={item.image}
         style={styles.image}
@@ -148,26 +148,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     height: 250,
   },
-  card: {
-    width: width - 40,
-    marginHorizontal: 20,
+  imageContainer: {
+    width: width, // Full screen width
     height: 220,
-    borderRadius: 12,
-    overflow: "hidden",
-    // Add shadow that works in both themes
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: 12,
   },
   dotsContainer: {
     flexDirection: "row",

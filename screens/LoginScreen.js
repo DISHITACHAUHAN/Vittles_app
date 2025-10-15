@@ -8,10 +8,11 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  ImageBackground,
   ScrollView,
+  StatusBar
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginScreen({ navigation }) {
@@ -20,6 +21,7 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -53,22 +55,44 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/download.jpg")}
-      style={styles.background}
-      blurRadius={3}
+    <LinearGradient
+      colors={["#8B3358", "#670D2F", "#3A081C"]}
+      style={styles.container}
     >
+      <StatusBar barStyle="light-content" backgroundColor="#3A081C" />
       <KeyboardAvoidingView
-        style={styles.container}
+        style={styles.keyboardAvoid}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.content}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>
-              Sign in to continue your food journey
-            </Text>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header Section */}
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <View style={styles.logo}>
+                <Ionicons name="restaurant" size={36} color="#FFFFFF" />
+              </View>
+              <Text style={styles.logoText}>Vittles</Text>
+            </View>
+            <Text style={styles.tagline}>Delicious experiences await</Text>
+          </View>
 
+          {/* Background Decorative Elements */}
+          <View style={styles.backgroundCircle1} />
+          <View style={styles.backgroundCircle2} />
+          
+          {/* Login Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.title}>Welcome Back!</Text>
+              <Text style={styles.subtitle}>
+                Log in to continue your food journey
+              </Text>
+            </View>
+
+            {/* Error Message */}
             {error ? (
               <View style={styles.errorBox}>
                 <Ionicons name="alert-circle" size={20} color="#DC2626" />
@@ -81,13 +105,13 @@ export default function LoginScreen({ navigation }) {
               <Ionicons
                 name="mail-outline"
                 size={20}
-                color="#666"
+                color="#8B3358"
                 style={styles.icon}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Email Address"
-                placeholderTextColor="#999"
+                placeholderTextColor="#A8A8A8"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -102,23 +126,33 @@ export default function LoginScreen({ navigation }) {
               <Ionicons
                 name="lock-closed-outline"
                 size={20}
-                color="#666"
+                color="#8B3358"
                 style={styles.icon}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholderTextColor="#999"
+                placeholderTextColor="#A8A8A8"
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={!isPasswordVisible}
                 autoCapitalize="none"
                 editable={!isLoading}
                 onSubmitEditing={handleLogin}
               />
+              <TouchableOpacity 
+                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                style={styles.visibilityToggle}
+              >
+                <Ionicons 
+                  name={isPasswordVisible ? "eye-off-outline" : "eye-outline"} 
+                  size={20} 
+                  color="#A8A8A8" 
+                />
+              </TouchableOpacity>
             </View>
 
-            {/* 🔹 Forgot Password Button */}
+            {/* Forgot Password */}
             <TouchableOpacity
               style={styles.forgotPasswordContainer}
               onPress={() => navigation.navigate("ForgotPassword")}
@@ -128,7 +162,7 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            {/* Sign In Button */}
+            {/* Login Button */}
             <TouchableOpacity
               style={[styles.loginButton, isLoading && styles.disabledButton]}
               onPress={handleLogin}
@@ -138,13 +172,16 @@ export default function LoginScreen({ navigation }) {
               {isLoading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text style={styles.loginButtonText}>Sign In</Text>
+                <View style={styles.buttonContent}>
+                  <Text style={styles.loginButtonText}>Log In</Text>
+                  <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+                </View>
               )}
             </TouchableOpacity>
 
-            {/* Signup Redirect */}
+            {/* Sign Up Link */}
             <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Don't have an account? </Text>
+              <Text style={styles.signupText}>New to Vittles? </Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Signup")}
                 disabled={isLoading}
@@ -154,52 +191,132 @@ export default function LoginScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              By continuing, you agree to our Terms & Privacy Policy
+            </Text>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
   container: {
+    flex: 1,
+  },
+  keyboardAvoid: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
+    paddingHorizontal: 24,
   },
-  content: {
-    padding: 24,
+  header: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  logoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  logoText: {
+    fontSize: 36,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    letterSpacing: -0.5,
+  },
+  tagline: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.8)",
+    fontStyle: "italic",
+    fontWeight: "500",
+  },
+  backgroundCircle1: {
+    position: "absolute",
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: "rgba(139, 51, 88, 0.2)",
+    top: "10%",
+    left: -80,
+  },
+  backgroundCircle2: {
+    position: "absolute",
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "rgba(58, 8, 28, 0.3)",
+    bottom: "15%",
+    right: -60,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 32,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: "#F8F8F8",
+    zIndex: 1,
+  },
+  cardHeader: {
+    marginBottom: 8,
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
+    fontWeight: "800",
     textAlign: "center",
     marginBottom: 8,
-    color: "#1F2937",
+    color: "#2D2D2D",
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 16,
     textAlign: "center",
     marginBottom: 32,
-    color: "#6B7280",
+    color: "#666",
     lineHeight: 22,
+    fontWeight: "500",
   },
   inputContainer: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 16,
+    marginBottom: 20,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    height: 56,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    height: 58,
+    borderWidth: 1.5,
+    borderColor: "#F0F0F0",
   },
   icon: {
     marginRight: 12,
@@ -207,18 +324,22 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#1F2937",
+    color: "#2D2D2D",
     height: "100%",
+    fontWeight: "500",
+  },
+  visibilityToggle: {
+    padding: 4,
   },
   errorBox: {
-    backgroundColor: "#FEE2E2",
+    backgroundColor: "#FEF2F2",
     padding: 16,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 24,
     flexDirection: "row",
     alignItems: "center",
-    borderLeftWidth: 4,
-    borderLeftColor: "#DC2626",
+    borderWidth: 1,
+    borderColor: "#FECACA",
   },
   errorText: {
     color: "#DC2626",
@@ -229,21 +350,33 @@ const styles = StyleSheet.create({
   },
   forgotPasswordContainer: {
     alignSelf: "flex-end",
-    marginBottom: 16,
+    marginBottom: 28,
   },
   forgotPasswordText: {
-    color: "#FF6B6B",
+    color: "#8B3358",
     fontSize: 15,
     fontWeight: "600",
   },
   loginButton: {
-    backgroundColor: "#FF6B6B",
-    height: 56,
-    borderRadius: 12,
+    backgroundColor: "#8B3358",
+    height: 58,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 8,
     marginBottom: 24,
+    shadowColor: "#8B3358",
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   disabledButton: {
     opacity: 0.6,
@@ -251,7 +384,7 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
   },
   signupContainer: {
     flexDirection: "row",
@@ -259,13 +392,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   signupText: {
-    color: "#6B7280",
+    color: "#666",
     fontSize: 16,
   },
   signupLink: {
-    color: "#FF6B6B",
+    color: "#8B3358",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
     marginLeft: 4,
+  },
+  footer: {
+    marginTop: 32,
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  footerText: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 12,
+    textAlign: "center",
+    lineHeight: 16,
   },
 });

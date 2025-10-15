@@ -1,5 +1,5 @@
 import React from "react";
-import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
+// import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -15,16 +15,13 @@ import {
   Image
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native"; // Added missing import
-
+import { useNavigation } from "@react-navigation/native";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { DataProvider } from "./contexts/DataContext";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
-
 import HomeStack from "./navigation/HomeStack";
 import ProfileStack from "./navigation/ProfileStack";
-
 import LoginScreen from "./screens/LoginScreen";
 import SignupScreen from "./screens/SignupScreen";
 import AlertsScreen from "./screens/AlertsScreen";
@@ -32,6 +29,7 @@ import CartScreen from "./screens/CartScreen";
 import VendorMenu from "./screens/VendorMenu";
 import VendorDashboard from "./screens/VendorDashboard";
 import vit from './assets/Vittles_2.jpg';
+import ForgotPasswordScreen from "./screens/ForgotPassword";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -151,7 +149,7 @@ const RootNavigator = () => {
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen } />
         </>
       )}
     </Stack.Navigator>

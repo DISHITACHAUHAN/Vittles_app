@@ -36,32 +36,32 @@ export default function ProfileScreen({ navigation }) {
     {
       icon: "card-outline",
       title: "Payment Methods",
-      onPress: () => navigation.navigate("PaymentMethods")
+      onPress: () => navigation.navigate("Account", { screen: "PaymentMethods" })
     },
     {
       icon: "receipt-outline",
       title: "Order History",
-      onPress: () => navigation.navigate("OrderHistory")
+      onPress: () => navigation.navigate("Account", { screen: "OrderHistory" })
     },
-    {
-      icon: "star-outline",
-      title: "My Reviews",
-      onPress: () => navigation.navigate("MyReviews")
-    },
+    // {
+    //   icon: "star-outline",
+    //   title: "My Reviews",
+    //   onPress: () => navigation.navigate("Account", { screen: "MyReviews" })
+    // },
     {
       icon: "settings-outline",
       title: "Settings",
-      onPress: () => navigation.navigate("Settings")
+      onPress: () => navigation.navigate("Account", { screen: "Settings" })
     },
     {
       icon: "help-circle-outline",
       title: "Help & Support",
-      onPress: () => navigation.navigate("HelpSupport")
+      onPress: () => navigation.navigate("Account", { screen: "HelpSupport" })
     },
     {
       icon: "document-text-outline",
       title: "Privacy Policy",
-      onPress: () => navigation.navigate("PrivacyPolicy")
+      onPress: () => navigation.navigate("Account", { screen: "PrivacyPolicy" })
     },
   ];
 
@@ -202,6 +202,15 @@ export default function ProfileScreen({ navigation }) {
     // Confirmation Content
     return (
       <>
+        {/* Cancel Icon in Top Right */}
+        <TouchableOpacity
+          style={styles.cancelIconButton}
+          onPress={() => hideAlert()}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="close" size={24} color="#8B3358" />
+        </TouchableOpacity>
+
         <View style={styles.alertContentContainer}>
           {/* Animated Exit Icon */}
           <Animated.View 
@@ -211,10 +220,10 @@ export default function ProfileScreen({ navigation }) {
             ]}
           >
             <LinearGradient
-              colors={['#FF6B6B', '#FF3B30', '#E74C3C']}
+              colors={["#8B3358", "#670D2F", "#3A081C"]}
               style={styles.alertIconBackground}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
             >
               <Ionicons name="log-out-outline" size={36} color="#FFF" />
             </LinearGradient>
@@ -222,12 +231,12 @@ export default function ProfileScreen({ navigation }) {
             {/* Pulsing ring effect */}
             <Animated.View style={[styles.pulseRing, { 
               transform: [{ scale: fadeAnim }],
-              borderColor: '#FF3B30'
+              borderColor: '#8B3358'
             }]} />
           </Animated.View>
 
           <Text style={[styles.alertTitle, { color: colors.text }]}>
-            Ready to Leave? 🚪
+            Ready to Leave? 
           </Text>
           <Text style={[styles.alertMessage, { color: colors.textSecondary }]}>
             You're about to sign out of your account.{'\n'}Don't worry, your data is safe and sound!
@@ -235,36 +244,20 @@ export default function ProfileScreen({ navigation }) {
         </View>
 
         <View style={[styles.alertButtonsContainer, { borderTopColor: 'rgba(255,255,255,0.1)' }]}>
-          {/* Cancel Button with nice gradient border */}
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => hideAlert()}
-            activeOpacity={0.7}
-          >
-            <LinearGradient
-              colors={['transparent', 'transparent']}
-              style={[styles.cancelButtonBorder, { borderColor: colors.border }]}
-            >
-              <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>
-                Stay Signed In
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Primary Sign Out Button */}
+          {/* Only Sign Out Button - Cancel button removed */}
           <TouchableOpacity
             style={styles.confirmButtonWrapper}
             onPress={handleSignOut}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#FF6B6B', '#FF3B30', '#E74C3C']}
+              colors={["#8B3358", "#670D2F", "#3A081C"]}
               style={styles.confirmButtonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
             >
               <Ionicons name="log-out-outline" size={20} color="#FFF" />
-              <Text style={styles.confirmButtonText}>Yes, Sign Out</Text>
+              <Text style={styles.confirmButtonText}>LOG OUT</Text>
               
               {/* Button shine effect */}
               <LinearGradient
@@ -303,7 +296,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={[styles.personalInfoCard, { backgroundColor: colors.card }]}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <Ionicons name="person-circle-outline" size={80} color={colors.primary} />
+              <Ionicons name="person-circle-outline" size={80} color="#8B3358" />
             </View>
           </View>
           <View style={styles.userInfo}>
@@ -313,16 +306,35 @@ export default function ProfileScreen({ navigation }) {
             <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
               {user?.email || "No email found"}
             </Text>
-            <Text style={[styles.memberSince, { color: colors.textSecondary }]}>
-              Member since January 2024
-            </Text>
           </View>
+          
+          {/* Edit Profile Button - Smaller size */}
           <TouchableOpacity
-            style={[styles.editProfileButton, { backgroundColor: colors.primary }]}
-            onPress={() => navigation.navigate("PersonalInfo")}
+            style={styles.editProfileButton}
+            onPress={() => navigation.navigate("Account", { screen: "PersonalInfo" })}
+            activeOpacity={0.8}
           >
-            <Ionicons name="pencil-outline" size={16} color="#fff" />
-            <Text style={styles.editProfileText}>Edit Profile</Text>
+            <LinearGradient
+              colors={["#8B3358", "#670D2F", "#3A081C"]}
+              style={styles.editProfileGradient}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <View style={styles.editProfileContent}>
+                <View style={styles.editProfileIconContainer}>
+                  <Ionicons name="pencil-outline" size={18} color="#FFF" />
+                </View>
+                <Text style={styles.editProfileText}>Edit Profile</Text>
+              </View>
+              
+              {/* Button shine effect */}
+              <LinearGradient
+                colors={['rgba(255,255,255,0.2)', 'rgba(255,255,255,0)']}
+                style={styles.buttonShine}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
@@ -340,35 +352,43 @@ export default function ProfileScreen({ navigation }) {
             >
               <View style={styles.menuItemLeft}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name={item.icon} size={20} color={colors.primary} />
+                  <Ionicons name={item.icon} size={20} color="#8B3358" />
                 </View>
                 <Text style={[styles.menuItemText, { color: colors.text }]}>{item.title}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              <Ionicons name="chevron-forward" size={16} color="#8B3358" />
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Enhanced Sign Out Button */}
+        {/* Enhanced Sign Out Button with Gradient */}
         <TouchableOpacity
-          style={[styles.signOutButton, { backgroundColor: colors.card }]}
+          style={styles.signOutButton}
           onPress={showSignOutAlert}
+          activeOpacity={0.8}
         >
           <LinearGradient
-            colors={['rgba(255, 59, 48, 0.1)', 'rgba(255, 59, 48, 0.05)']}
-            style={styles.signOutIconContainer}
+            colors={["#8B3358", "#670D2F", "#3A081C"]}
+            style={styles.signOutGradient}
+            start={{ x: 0, y: 1 }}
+            end={{ x: 1, y: 0 }}
           >
-            <Ionicons name="log-out-outline" size={20} color="#FF3B30" />
+            <View style={styles.signOutContent}>
+              <View style={styles.signOutIconContainer}>
+                <Ionicons name="log-out-outline" size={20} color="#FFF" />
+              </View>
+              <Text style={styles.signOutText}>Sign Out</Text>
+            </View>
+            
+            {/* Button shine effect */}
+            <LinearGradient
+              colors={['rgba(255,255,255,0.2)', 'rgba(255,255,255,0)']}
+              style={styles.buttonShine}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
           </LinearGradient>
-          <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
-
-        {/* App Version */}
-        <View style={styles.versionContainer}>
-          <Text style={[styles.versionText, { color: colors.textSecondary }]}>
-            App Version 1.0.0
-          </Text>
-        </View>
       </ScrollView>
 
       {/* Beautiful Custom Alert Modal */}
@@ -444,15 +464,41 @@ const styles = StyleSheet.create({
   userName: { fontSize: 22, fontWeight: "700", marginBottom: 8, textAlign: "center" },
   userEmail: { fontSize: 16, marginBottom: 6, textAlign: "center" },
   memberSince: { fontSize: 14, textAlign: "center" },
+  
+  // Edit Profile Button - Smaller size
   editProfileButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 25,
-    gap: 8,
+    marginTop: 10,
+    borderRadius: 14, // Smaller border radius
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 }, // Smaller shadow
+    shadowOpacity: 0.1,
+    shadowRadius: 8, // Smaller shadow radius
+    elevation: 4, // Smaller elevation
+    overflow: 'hidden',
+    height: 48, // Smaller height
+    width: '80%', // Smaller width
   },
-  editProfileText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  editProfileGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  editProfileContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editProfileIconContainer: {
+    marginRight: 10, // Smaller margin
+  },
+  editProfileText: { 
+    fontSize: 15, // Smaller font size
+    fontWeight: "600", 
+    color: "#FFF" 
+  },
+  
   menuContainer: {
     marginHorizontal: 20,
     marginTop: 24,
@@ -476,32 +522,42 @@ const styles = StyleSheet.create({
   menuItemLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
   iconContainer: { width: 32, alignItems: "center" },
   menuItemText: { fontSize: 16, marginLeft: 12, fontWeight: "500" },
+  
+  // Sign Out Button Styles (unchanged - larger size)
   signOutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     marginHorizontal: 20,
     marginTop: 24,
     marginBottom: 16,
-    padding: 18,
     borderRadius: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 59, 48, 0.1)',
+    overflow: 'hidden',
+    height: 56,
   },
-  signOutIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+  signOutGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  signOutContent: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  signOutIconContainer: {
     marginRight: 12,
   },
-  signOutText: { fontSize: 16, fontWeight: "600", color: "#FF3B30" },
+  signOutText: { 
+    fontSize: 16, 
+    fontWeight: "600", 
+    color: "#FFF" 
+  },
+  
   versionContainer: { alignItems: "center", marginTop: 8 },
   versionText: { fontSize: 14 },
   
@@ -517,7 +573,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     width: '100%',
     maxWidth: 360,
-    minHeight: 380,
+    minHeight: 350,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.4,
@@ -526,6 +582,19 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
+  },
+  // Cancel Icon in Top Right
+  cancelIconButton: {
+    position: 'absolute',
+    top: 16,
+    right: 10,
+    zIndex: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   alertBackground: {
     position: 'absolute',
@@ -542,34 +611,35 @@ const styles = StyleSheet.create({
   bgCircle1: {
     width: 120,
     height: 120,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#8B3358',
     top: -40,
     right: -40,
   },
   bgCircle2: {
     width: 80,
     height: 80,
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#670D2F',
     bottom: -20,
     left: -20,
   },
   bgCircle3: {
     width: 60,
     height: 60,
-    backgroundColor: '#E74C3C',
+    backgroundColor: '#3A081C',
     top: '50%',
     left: '70%',
   },
   alertContentContainer: {
     alignItems: 'center',
     padding: 32,
-    paddingBottom: 24,
-    minHeight: 240,
+    paddingTop: 40,
+    paddingBottom: 20,
+    minHeight: 200,
     justifyContent: 'center',
   },
   alertIconWrapper: {
     position: 'relative',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   alertIconBackground: {
     width: 80,
@@ -577,7 +647,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#FF3B30',
+    shadowColor: '#8B3358',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
@@ -597,12 +667,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    marginBottom: 24,
-    shadowColor: '#2ECC71',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 16,
+    marginBottom: 20,
   },
   successGradient: {
     width: '100%',
@@ -614,45 +679,32 @@ const styles = StyleSheet.create({
   alertTitle: {
     fontSize: 24,
     fontWeight: '800',
-    marginBottom: 12,
+    marginBottom: 10,
     textAlign: 'center',
     lineHeight: 32,
   },
   alertMessage: {
     fontSize: 16,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 22,
     fontWeight: '500',
   },
   alertButtonsContainer: {
     borderTopWidth: 1,
     flexDirection: 'column',
     padding: 0,
-  },
-  cancelButton: {
-    padding: 0,
-    margin: 0,
-  },
-  cancelButtonBorder: {
-    paddingVertical: 18,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  cancelButtonText: {
-    fontSize: 17,
-    fontWeight: '600',
+    marginTop: 0,
   },
   confirmButtonWrapper: {
     margin: 0,
     padding: 0,
   },
   confirmButtonGradient: {
-    paddingVertical: 20,
+    paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -671,7 +723,7 @@ const styles = StyleSheet.create({
   },
   loadingDots: {
     flexDirection: 'row',
-    marginTop: 20,
+    marginTop: 16,
     gap: 6,
   },
   dot: {

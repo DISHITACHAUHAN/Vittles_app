@@ -1,5 +1,5 @@
 // screens/PersonalInfoScreen.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   View, 
   Text, 
@@ -8,30 +8,74 @@ import {
   TextInput, 
   TouchableOpacity, 
   StatusBar,
-  Alert 
+  Alert   
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "../contexts/ThemeContext"; // Import theme hook
+import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext"; // Import AuthContext
 
 export default function PersonalInfoScreen({ navigation }) {
-  const { colors } = useTheme(); // Get theme colors
+  const { colors } = useTheme();
+  const { user, updateUserProfile } = useAuth(); // Get user data and update function
   
   const [userInfo, setUserInfo] = useState({
-    fullName: "John Davidson",
-    email: "john.d@example.com",
-    phoneNumber: "+1 (555) 123-4567",
-    address: "123 Main Street, Apt 4B",
-    city: "New York",
-    zipCode: "10001"
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
+    zipCode: ""
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [originalData, setOriginalData] = useState({});
 
-  const handleSave = () => {
-    // Simulate save operation
-    setIsEditing(false);
-    Alert.alert("Success", "Your personal information has been updated successfully!");
+  // Initialize form data when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      const userData = {
+        fullName: user.name || user.fullName || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || "",
+        city: user.city || "",
+        zipCode: user.zipCode || ""
+      };
+      setUserInfo(userData);
+      setOriginalData(userData); // Store original data for cancel operation
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    
+    try {
+      // Prepare data for update
+      const updatedData = {
+        name: userInfo.fullName,
+        email: userInfo.email,
+        phoneNumber: userInfo.phoneNumber,
+        address: userInfo.address,
+        city: userInfo.city,
+        zipCode: userInfo.zipCode
+      };
+
+      // Call update function from AuthContext
+      await updateUserProfile(updatedData);
+      
+      setIsEditing(false);
+      setOriginalData(userInfo); // Update original data
+      Alert.alert("Success", "Your personal information has been updated successfully!");
+    } catch (error) {
+      console.error("Update failed:", error);
+      Alert.alert("Error", "Failed to update profile. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEdit = () => {
@@ -39,8 +83,9 @@ export default function PersonalInfoScreen({ navigation }) {
   };
 
   const handleCancel = () => {
+    // Reset to original data
+    setUserInfo(originalData);
     setIsEditing(false);
-    // Reset form data if needed
   };
 
   const updateField = (field, value) => {
@@ -50,6 +95,36 @@ export default function PersonalInfoScreen({ navigation }) {
     }));
   };
 
+  const validateForm = () => {
+    if (!userInfo.fullName.trim()) {
+      Alert.alert("Validation Error", "Please enter your full name");
+      return false;
+    }
+    
+    if (!userInfo.email.trim()) {
+      Alert.alert("Validation Error", "Please enter your email address");
+      return false;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userInfo.email)) {
+      Alert.alert("Validation Error", "Please enter a valid email address");
+      return false;
+    }
+
+    if (!userInfo.phoneNumber.trim()) {
+      Alert.alert("Validation Error", "Please enter your phone number");
+      return false;
+    }
+
+    return true;
+  };
+
+  const hasChanges = () => {
+    return JSON.stringify(userInfo) !== JSON.stringify(originalData);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor="#8B3358" />
@@ -57,8 +132,8 @@ export default function PersonalInfoScreen({ navigation }) {
       {/* Header with LinearGradient */}
       <LinearGradient
         colors={["#8B3358", "#670D2F", "#3A081C"]}
-        start={{ x: 0, y: 1 }}   // bottom-left
-        end={{ x: 1, y: 0 }}     // top-right
+        start={{ x: 0, y: 1 }}
+        end={{ x: 1, y: 0 }}
         style={styles.header}
       >
         <View style={styles.headerContent}>
@@ -97,14 +172,7 @@ export default function PersonalInfoScreen({ navigation }) {
               <Ionicons name="person" size={40} color={colors.primary} />
             </View>
           </View>
-          <TouchableOpacity 
-            style={[styles.changePhotoButton, { borderColor: colors.primary }]}
-            disabled={!isEditing}
-          >
-            <Text style={[styles.changePhotoText, { color: colors.primary }]}>
-              Change Photo
-            </Text>
-          </TouchableOpacity>
+         
         </View>
 
         {/* Personal Information Form */}
@@ -112,7 +180,7 @@ export default function PersonalInfoScreen({ navigation }) {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Basic Information</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Full Name</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Full Name *</Text>
             <TextInput
               style={[
                 styles.input, 
@@ -132,7 +200,7 @@ export default function PersonalInfoScreen({ navigation }) {
           </View>
           
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Email Address</Text>
+            <Text style={[styles.label, { color: colors.text }]}>Email Address *</Text>
             <TextInput
               style={[
                 styles.input, 
@@ -153,99 +221,34 @@ export default function PersonalInfoScreen({ navigation }) {
             />
           </View>
           
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Phone Number</Text>
-            <TextInput
-              style={[
-                styles.input, 
-                { 
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
-                  color: colors.text
-                },
-                isEditing && styles.inputEditing
-              ]}
-              placeholder="Enter your phone number"
-              placeholderTextColor={colors.textSecondary}
-              keyboardType="phone-pad"
-              value={userInfo.phoneNumber}
-              onChangeText={(text) => updateField('phoneNumber', text)}
-              editable={isEditing}
-            />
-          </View>
+         
 
-          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>Address Information</Text>
           
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Street Address</Text>
-            <TextInput
-              style={[
-                styles.input, 
-                { 
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
-                  color: colors.text
-                },
-                isEditing && styles.inputEditing
-              ]}
-              placeholder="Enter your street address"
-              placeholderTextColor={colors.textSecondary}
-              value={userInfo.address}
-              onChangeText={(text) => updateField('address', text)}
-              editable={isEditing}
-            />
-          </View>
+          
+         
 
-          <View style={styles.rowInputs}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: 12 }]}>
-              <Text style={[styles.label, { color: colors.text }]}>City</Text>
-              <TextInput
-                style={[
-                  styles.input, 
-                  { 
-                    backgroundColor: colors.background,
-                    borderColor: colors.border,
-                    color: colors.text
-                  },
-                  isEditing && styles.inputEditing
-                ]}
-                placeholder="City"
-                placeholderTextColor={colors.textSecondary}
-                value={userInfo.city}
-                onChangeText={(text) => updateField('city', text)}
-                editable={isEditing}
-              />
-            </View>
-            
-            <View style={[styles.inputGroup, { flex: 1 }]}>
-              <Text style={[styles.label, { color: colors.text }]}>ZIP Code</Text>
-              <TextInput
-                style={[
-                  styles.input, 
-                  { 
-                    backgroundColor: colors.background,
-                    borderColor: colors.border,
-                    color: colors.text
-                  },
-                  isEditing && styles.inputEditing
-                ]}
-                placeholder="ZIP Code"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="numeric"
-                value={userInfo.zipCode}
-                onChangeText={(text) => updateField('zipCode', text)}
-                editable={isEditing}
-              />
-            </View>
-          </View>
+          
 
           {isEditing && (
             <TouchableOpacity 
-              style={[styles.saveButton, { backgroundColor: colors.primary }]}
+              style={[
+                styles.saveButton, 
+                { 
+                  backgroundColor: hasChanges() ? colors.primary : colors.textSecondary,
+                  opacity: isLoading ? 0.7 : 1
+                }
+              ]}
               onPress={handleSave}
+              disabled={!hasChanges() || isLoading}
             >
-              <Ionicons name="checkmark-circle" size={20} color="#FFF" />
-              <Text style={styles.saveButtonText}>Save Changes</Text>
+              {isLoading ? (
+                <Ionicons name="refresh" size={20} color="#FFF" />
+              ) : (
+                <Ionicons name="checkmark-circle" size={20} color="#FFF" />
+              )}
+              <Text style={styles.saveButtonText}>
+                {isLoading ? "Saving..." : "Save Changes"}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -268,7 +271,7 @@ export default function PersonalInfoScreen({ navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.securityButton, { borderColor: colors.border }]}
+            style={[styles.securityButton, { borderColor: colors.border, borderBottomWidth: 0 }]}
             onPress={() => navigation.navigate('TwoFactorAuth')}
           >
             <View style={styles.securityButtonLeft}>
@@ -280,6 +283,15 @@ export default function PersonalInfoScreen({ navigation }) {
             <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
+
+        {/* Required Fields Note */}
+        {isEditing && (
+          <View style={styles.requiredNote}>
+            <Text style={[styles.requiredText, { color: colors.textSecondary }]}>
+              * Required fields
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -408,6 +420,7 @@ const styles = StyleSheet.create({
   },
   inputEditing: {
     borderWidth: 2,
+    borderColor: '#8B3358',
   },
   rowInputs: {
     flexDirection: "row",
@@ -458,5 +471,14 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginLeft: 12,
     flex: 1,
+  },
+  requiredNote: {
+    alignItems: "center",
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  requiredText: {
+    fontSize: 12,
+    fontStyle: "italic",
   },
 });

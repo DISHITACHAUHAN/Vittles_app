@@ -49,7 +49,7 @@ export default function ImageCarousel() {
           animated: true
         });
         setActiveIndex(nextIndex);
-      }, 4000);
+      }, 3000);
     };
 
     const stopAutoScroll = () => {
@@ -144,17 +144,17 @@ export default function ImageCarousel() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
+    marginTop: 1,
     marginBottom: 30,
     height: 250,
   },
   card: {
-    width: width - 40,
-    marginHorizontal: 20,
+    width: width, // Full window width
     height: 220,
-    borderRadius: 12,
+    // Removed marginHorizontal to take full width
+    borderRadius: 0, // Remove border radius for full width or keep if you want rounded top/bottom only
     overflow: "hidden",
-    // Add shadow that works in both themes
+    // Shadow adjustments for full width
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: 12,
+    borderRadius: 0, // Remove border radius to match card
   },
   dotsContainer: {
     flexDirection: "row",
@@ -180,6 +180,6 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     marginHorizontal: 4,
-    transition: 'all 0.3s ease', // Smooth transition for dot width changes
+    transition: 'all 0.3s ease',
   },
 });

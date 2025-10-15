@@ -74,8 +74,10 @@ export default function ForgotPasswordScreen({ navigation }) {
           {/* Header Section */}
           <View style={styles.header}>
             <TouchableOpacity 
-              
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
             >
+              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
             </TouchableOpacity>
             <View style={styles.logoContainer}>
               <View style={styles.logo}>

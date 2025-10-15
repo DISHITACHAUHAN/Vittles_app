@@ -17,7 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function SignupScreen({ navigation }) {
-  const { register, login } = useAuth();
+  const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,63 +44,22 @@ export default function SignupScreen({ navigation }) {
     setIsLoading(true);
 
     try {
-      // First register the user
       const result = await register(name, email, password);
 
       if (result.success) {
-        // If registration is successful, automatically log the user in
-        const loginResult = await login(email, password);
-        
-        if (loginResult.success) {
-          // User is now logged in - no need to navigate as the auth context
-          // will handle redirecting to the main app
-          Alert.alert(
-            "Welcome to Vittles! 🎉",
-            "Your account has been created and you're now logged in.",
-            [
-              { 
-                text: "Start Exploring", 
-                onPress: () => {
-                  // Navigation will be handled by the auth state change
-                  // But we can optionally reset the navigation stack here
-                  navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Main' }],
-                  });
-                }
-              }
-            ]
-          );
-        } else {
-          // Registration succeeded but login failed - navigate to login
-          Alert.alert(
-            "Account Created!",
-            "Your account has been created successfully. Please log in.",
-            [
-              { 
-                text: "Sign In", 
-                onPress: () => navigation.navigate("Login") 
-              }
-            ]
-          );
-        }
+        Alert.alert(
+          "Welcome to Vittles!",
+          "Your account has been created successfully",
+          [{ text: "Continue", onPress: () => navigation.navigate("Login") }]
+        );
       } else {
-        setError(result.error || "Registration failed. Please try again.");
+        setError(result.error);
       }
     } catch (error) {
-      console.error("Signup error:", error);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleQuickDemo = () => {
-    // Pre-fill form with demo data for testing
-    setName("Demo User");
-    setEmail("demo@vittles.com");
-    setPassword("123456");
-    setError("");
   };
 
   return (
@@ -137,19 +96,9 @@ export default function SignupScreen({ navigation }) {
             <View style={styles.cardHeader}>
               <Text style={styles.title}>Join Vittles!</Text>
               <Text style={styles.subtitle}>
-                Create your account and start exploring immediately
+                Create your account to start your food journey
               </Text>
             </View>
-
-            {/* Demo Button - Remove in production */}
-            <TouchableOpacity 
-              style={styles.demoButton}
-              onPress={handleQuickDemo}
-              disabled={isLoading}
-            >
-              <Ionicons name="rocket-outline" size={16} color="#8B3358" />
-              <Text style={styles.demoButtonText}>Quick Demo</Text>
-            </TouchableOpacity>
 
             {/* Error Message */}
             {error ? (
@@ -209,7 +158,7 @@ export default function SignupScreen({ navigation }) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Password (min. 6 characters)"
+                placeholder="Password"
                 placeholderTextColor="#A8A8A8"
                 value={password}
                 onChangeText={setPassword}
@@ -240,24 +189,14 @@ export default function SignupScreen({ navigation }) {
               disabled={isLoading}
             >
               {isLoading ? (
-                <View style={styles.buttonContent}>
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                  <Text style={styles.signupButtonText}>Creating Account...</Text>
-                </View>
+                <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <View style={styles.buttonContent}>
-                  <Ionicons name="person-add" size={20} color="#FFFFFF" />
-                  <Text style={styles.signupButtonText}>Create Account & Login</Text>
+                  <Text style={styles.signupButtonText}>Create Account</Text>
+                  <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
                 </View>
               )}
             </TouchableOpacity>
-
-            {/* Divider */}
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={styles.dividerLine} />
-            </View>
 
             {/* Login Link */}
             <View style={styles.loginContainer}>
@@ -268,25 +207,6 @@ export default function SignupScreen({ navigation }) {
               >
                 <Text style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Features List */}
-          <View style={styles.featuresContainer}>
-            <Text style={styles.featuresTitle}>Start your food journey today</Text>
-            <View style={styles.featuresList}>
-              <View style={styles.featureItem}>
-                <Ionicons name="restaurant-outline" size={20} color="#FFFFFF" />
-                <Text style={styles.featureText}>Discover local restaurants</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Ionicons name="star-outline" size={20} color="#FFFFFF" />
-                <Text style={styles.featureText}>Save your favorites</Text>
-              </View>
-              <View style={styles.featureItem}>
-                <Ionicons name="flash-outline" size={20} color="#FFFFFF" />
-                <Text style={styles.featureText}>Quick reordering</Text>
-              </View>
             </View>
           </View>
 
@@ -313,7 +233,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
-    paddingVertical: 20,
   },
   header: {
     alignItems: "center",
@@ -386,7 +305,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#F8F8F8",
     zIndex: 1,
-    marginBottom: 24,
   },
   cardHeader: {
     marginBottom: 8,
@@ -402,28 +320,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: 32,
     color: "#666",
     lineHeight: 22,
     fontWeight: "500",
-  },
-  demoButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(139, 51, 88, 0.1)",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "rgba(139, 51, 88, 0.2)",
-  },
-  demoButtonText: {
-    color: "#8B3358",
-    fontSize: 14,
-    fontWeight: "600",
   },
   inputContainer: {
     backgroundColor: "#FAFAFA",
@@ -472,7 +372,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
     shadowColor: "#8B3358",
     shadowOffset: {
       width: 0,
@@ -495,22 +395,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
   },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#F0F0F0",
-  },
-  dividerText: {
-    color: "#999",
-    paddingHorizontal: 16,
-    fontSize: 14,
-    fontWeight: "500",
-  },
   loginContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -526,33 +410,8 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginLeft: 4,
   },
-  featuresContainer: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  featuresTitle: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  featuresList: {
-    width: "100%",
-    gap: 12,
-  },
-  featureItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  featureText: {
-    color: "rgba(255, 255, 255, 0.9)",
-    fontSize: 14,
-    fontWeight: "500",
-  },
   footer: {
+    marginTop: 32,
     alignItems: "center",
     paddingHorizontal: 20,
   },

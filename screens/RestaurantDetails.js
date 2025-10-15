@@ -17,7 +17,7 @@ import { useCart } from "../contexts/CartContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const RestaurantDetails = () => {
   const route = useRoute();
@@ -27,7 +27,7 @@ const RestaurantDetails = () => {
   const { colors } = useTheme();
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  // Enhanced sample menu data
+  // Sample menu data
   const sampleMenuItems = [
     {
       id: "1",
@@ -38,8 +38,6 @@ const RestaurantDetails = () => {
       category: "Main Course",
       isVeg: false,
       bestseller: true,
-      preparationTime: "25 mins",
-      spiceLevel: 2,
     },
     {
       id: "2",
@@ -49,7 +47,6 @@ const RestaurantDetails = () => {
       image: "https://images.unsplash.com/photo-1563379091339-03246963d9fb?w=400",
       category: "Breads",
       isVeg: true,
-      preparationTime: "15 mins",
     },
     {
       id: "3",
@@ -60,8 +57,6 @@ const RestaurantDetails = () => {
       category: "Main Course",
       isVeg: true,
       bestseller: true,
-      preparationTime: "30 mins",
-      spiceLevel: 3,
     },
     {
       id: "4",
@@ -71,7 +66,6 @@ const RestaurantDetails = () => {
       image: "https://images.unsplash.com/photo-1568724001336-2101ca2a0f8e?w=400",
       category: "Beverages",
       isVeg: true,
-      preparationTime: "5 mins",
     },
     {
       id: "5",
@@ -82,8 +76,6 @@ const RestaurantDetails = () => {
       category: "Starters",
       isVeg: true,
       bestseller: true,
-      preparationTime: "20 mins",
-      spiceLevel: 2,
     },
   ];
 
@@ -121,7 +113,7 @@ const RestaurantDetails = () => {
   // Animation values
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 300],
-    outputRange: [380, 120],
+    outputRange: [320, 100],
     extrapolate: 'clamp',
   });
 
@@ -139,34 +131,22 @@ const RestaurantDetails = () => {
 
   const titleTranslateY = scrollY.interpolate({
     inputRange: [0, 300],
-    outputRange: [0, -50],
+    outputRange: [0, -40],
     extrapolate: 'clamp',
   });
 
+  // New animation for header title
   const headerTitleOpacity = scrollY.interpolate({
-    inputRange: [200, 300],
+    inputRange: [150, 250],
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
 
-  const renderSpiceLevel = (level) => {
-    return (
-      <View style={styles.spiceContainer}>
-        <Text style={styles.spiceText}>🌶️</Text>
-        <View style={styles.spiceDots}>
-          {[1, 2, 3].map((dot) => (
-            <View
-              key={dot}
-              style={[
-                styles.spiceDot,
-                dot <= level ? styles.spiceDotActive : styles.spiceDotInactive
-              ]}
-            />
-          ))}
-        </View>
-      </View>
-    );
-  };
+  const headerBgOpacity = scrollY.interpolate({
+    inputRange: [150, 250],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
 
   const renderMenuItem = ({ item }) => {
     const existingItem = cart.find((cItem) => cItem.id === item.id);
@@ -175,6 +155,7 @@ const RestaurantDetails = () => {
     return (
       <View style={[styles.menuItem, { 
         backgroundColor: colors.card,
+        shadowColor: colors.text 
       }]}>
         <View style={styles.menuItemContent}>
           <View style={styles.menuItemInfo}>
@@ -188,9 +169,9 @@ const RestaurantDetails = () => {
                 />
               </View>
               {item.bestseller && (
-                <View style={styles.bestsellerTag}>
+                <View style={[styles.bestsellerTag, { backgroundColor: '#FFF8E1' }]}>
                   <Ionicons name="trophy" size={12} color="#FFD700" />
-                  <Text style={styles.bestsellerText}>
+                  <Text style={[styles.bestsellerText, { color: '#FF8F00' }]}>
                     Bestseller
                   </Text>
                 </View>
@@ -203,42 +184,23 @@ const RestaurantDetails = () => {
             <Text style={[styles.menuItemDescription, { color: colors.textSecondary }]}>
               {item.description}
             </Text>
-
-            <View style={styles.menuItemMeta}>
-              {item.preparationTime && (
-                <View style={styles.metaItem}>
-                  <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                    {item.preparationTime}
-                  </Text>
-                </View>
-              )}
-              {item.spiceLevel && renderSpiceLevel(item.spiceLevel)}
-            </View>
-
             <Text style={[styles.menuItemPrice, { color: colors.primary }]}>
               {item.price}
             </Text>
           </View>
 
           <View style={styles.menuItemAction}>
-            <View style={styles.imageContainer}>
-              {item.image ? (
-                <Image
-                  source={{ uri: item.image }}
-                  style={styles.menuItemImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={[styles.menuItemImagePlaceholder, { backgroundColor: colors.background }]}>
-                  <Ionicons name="fast-food" size={24} color={colors.textSecondary} />
-                </View>
-              )}
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.3)']}
-                style={styles.imageGradient}
+            {item.image ? (
+              <Image
+                source={{ uri: item.image }}
+                style={styles.menuItemImage}
+                resizeMode="cover"
               />
-            </View>
+            ) : (
+              <View style={[styles.menuItemImagePlaceholder, { backgroundColor: colors.background }]}>
+                <Ionicons name="fast-food" size={24} color={colors.textSecondary} />
+              </View>
+            )}
 
             <View style={styles.quantityContainer}>
               {quantity > 0 ? (
@@ -261,11 +223,11 @@ const RestaurantDetails = () => {
                 <TouchableOpacity
                   style={[styles.addButton, { 
                     backgroundColor: colors.primary,
+                    shadowColor: colors.primary 
                   }]}
                   onPress={() => handleAdd(item)}
                 >
                   <Text style={styles.addButtonText}>ADD</Text>
-                  <Ionicons name="add-circle" size={16} color="#fff" />
                 </TouchableOpacity>
               )}
             </View>
@@ -277,17 +239,17 @@ const RestaurantDetails = () => {
 
   const renderCategory = (category, index) => (
     <View key={index} style={styles.categorySection}>
-      <View style={styles.categoryHeader}>
-        <View style={styles.categoryTitleContainer}>
-          <Text style={[styles.categoryTitle, { color: colors.text }]}>
-            {category}
-          </Text>
-          <View style={[styles.categoryLine, { backgroundColor: colors.primary }]} />
-        </View>
+      <LinearGradient
+        colors={['transparent', 'rgba(139, 51, 88, 0.1)', 'transparent']}
+        style={styles.categoryHeader}
+      >
+        <Text style={[styles.categoryTitle, { color: colors.text }]}>
+          {category}
+        </Text>
         <Text style={[styles.categoryItemCount, { color: colors.textSecondary }]}>
           {groupedMenu[category].length} items
         </Text>
-      </View>
+      </LinearGradient>
       <FlatList
         data={groupedMenu[category]}
         renderItem={renderMenuItem}
@@ -318,7 +280,7 @@ const RestaurantDetails = () => {
       !restaurant.image.startsWith("http")
     ) {
       return (
-        <View style={styles.emojiContainer}>
+        <View style={[styles.emojiContainer, { backgroundColor: '#8B3358' }]}>
           <Text style={styles.emojiImage}>{restaurant.image}</Text>
         </View>
       );
@@ -342,6 +304,27 @@ const RestaurantDetails = () => {
         barStyle="light-content"
       />
 
+      {/* Animated Header Background */}
+      <Animated.View 
+        style={[
+          styles.headerBackground,
+          { 
+            opacity: headerBgOpacity,
+            backgroundColor: '#8B3358'
+          }
+        ]} 
+      />
+
+      {/* Animated Header Title */}
+      <Animated.View 
+        style={[
+          styles.headerTitleContainer,
+          { opacity: headerTitleOpacity }
+        ]}
+      >
+        <Text style={styles.headerTitleText}>{restaurant.name}</Text>
+      </Animated.View>
+
       {/* Animated Header */}
       <Animated.View style={[styles.header, { height: headerHeight }]}>
         <LinearGradient
@@ -363,11 +346,6 @@ const RestaurantDetails = () => {
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </LinearGradient>
         </TouchableOpacity>
-
-        {/* Animated Title */}
-        <Animated.View style={[styles.animatedTitle, { opacity: headerTitleOpacity }]}>
-          <Text style={styles.animatedTitleText}>{restaurant.name}</Text>
-        </Animated.View>
 
         {/* Restaurant Info Overlay */}
         <View style={styles.headerOverlay}>
@@ -393,22 +371,6 @@ const RestaurantDetails = () => {
               <Text style={styles.ratingDivider}>•</Text>
               <Text style={styles.cuisineType}>{restaurant.cuisine || "Indian Cuisine"}</Text>
             </View>
-            
-            {/* Additional Info */}
-            <View style={styles.restaurantMeta}>
-              <View style={styles.metaItem}>
-                <Ionicons name="location" size={14} color="#fff" />
-                <Text style={styles.metaText}>2.5 km</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="time" size={14} color="#fff" />
-                <Text style={styles.metaText}>30-40 min</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="cash" size={14} color="#fff" />
-                <Text style={styles.metaText}>₹300 for one</Text>
-              </View>
-            </View>
           </Animated.View>
         </View>
       </Animated.View>
@@ -428,27 +390,21 @@ const RestaurantDetails = () => {
             colors={["#4CAF50", "#45a049"]}
             style={styles.safetyGradient}
           >
-            <View style={styles.safetyIcon}>
-              <Ionicons name="shield-checkmark" size={20} color="#fff" />
-            </View>
-            <View style={styles.safetyTextContainer}>
-              <Text style={styles.safetyTitle}>Safety Assured</Text>
-              <Text style={styles.safetyText}>
-                Follows all safety measures for a safe dining experience
-              </Text>
-            </View>
+            <Ionicons name="shield-checkmark" size={18} color="#fff" />
+            <Text style={styles.safetyText}>
+              Follows all safety measures for a safe dining experience
+            </Text>
           </LinearGradient>
         </View>
 
         {/* Menu Sections */}
         <View style={styles.menuContainer}>
-          <View style={styles.menuHeader}>
-            <View style={styles.menuTitleContainer}>
-              <Text style={[styles.menuTitle, { color: colors.text }]}>
-                Featured Menu
-              </Text>
-              <View style={[styles.menuTitleLine, { backgroundColor: colors.primary }]} />
-            </View>
+          <View style={[styles.menuHeader, { 
+            borderBottomColor: colors.border 
+          }]}>
+            <Text style={[styles.menuTitle, { color: colors.text }]}>
+              Featured Menu
+            </Text>
             {totalItems > 0 && (
               <View style={[styles.cartBadge, { backgroundColor: colors.primary }]}>
                 <Text style={styles.cartBadgeText}>{totalItems}</Text>
@@ -489,10 +445,10 @@ const RestaurantDetails = () => {
               </View>
               <View style={styles.cartInfo}>
                 <Text style={styles.cartCount}>
-                  {totalItems} items • ₹{totalAmount}
+                  {totalItems} items in cart
                 </Text>
-                <Text style={styles.cartSubtext}>
-                  Extra charges may apply
+                <Text style={styles.cartTotal}>
+                  ₹{totalAmount}
                 </Text>
               </View>
               <View style={styles.viewCartButton}>
@@ -514,9 +470,34 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  headerBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+    zIndex: 98,
+  },
+  headerTitleContainer: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 99,
+  },
+  headerTitleText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 5,
+  },
   header: {
     position: "relative",
     overflow: "hidden",
+    zIndex: 97,
   },
   headerImage: {
     width: "100%",
@@ -528,7 +509,6 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: '#8B3358',
   },
   emojiImage: {
     fontSize: 80,
@@ -539,7 +519,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 60,
     left: 20,
-    zIndex: 10,
+    zIndex: 100,
   },
   backButtonGradient: {
     width: 40,
@@ -549,27 +529,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  animatedTitle: {
-    position: "absolute",
-    top: 60,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  animatedTitleText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 5,
-  },
   headerOverlay: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: 40,
+    paddingBottom: 30,
     paddingHorizontal: 20,
   },
   headerContent: {
@@ -579,7 +544,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 12,
+    marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 5,
@@ -588,7 +553,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flexWrap: 'wrap',
-    marginBottom: 16,
   },
   ratingBadge: {
     flexDirection: "row",
@@ -621,60 +585,29 @@ const styles = StyleSheet.create({
     color: "#fff",
     opacity: 0.9,
   },
-  restaurantMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  metaText: {
-    fontSize: 12,
-    color: "#fff",
-    opacity: 0.9,
-  },
   safetyBanner: {
     marginHorizontal: 20,
     marginTop: -20,
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 12,
+    shadowRadius: 8,
+    elevation: 8,
   },
   safetyGradient: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
-    borderRadius: 20,
-  },
-  safetyIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  safetyTextContainer: {
-    flex: 1,
-  },
-  safetyTitle: {
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: "bold",
-    marginBottom: 2,
+    padding: 16,
+    borderRadius: 16,
   },
   safetyText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#fff",
-    opacity: 0.9,
+    marginLeft: 10,
+    fontWeight: "600",
+    flex: 1,
   },
   menuContainer: {
     padding: 20,
@@ -685,32 +618,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 30,
-  },
-  menuTitleContainer: {
-    flex: 1,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
   },
   menuTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 8,
-  },
-  menuTitleLine: {
-    height: 4,
-    width: 60,
-    borderRadius: 2,
   },
   cartBadge: {
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minWidth: 32,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    minWidth: 28,
     alignItems: "center",
-    justifyContent: "center",
   },
   cartBadgeText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 14,
+    fontSize: 12,
   },
   categorySection: {
     marginBottom: 40,
@@ -720,33 +645,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 20,
-  },
-  categoryTitleContainer: {
-    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
   },
   categoryTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
-    marginBottom: 6,
-  },
-  categoryLine: {
-    height: 3,
-    width: 40,
-    borderRadius: 2,
   },
   categoryItemCount: {
     fontSize: 14,
     fontWeight: "500",
   },
   menuItem: {
-    borderRadius: 24,
+    borderRadius: 20,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8,
-    overflow: 'hidden',
+    shadowRadius: 12,
+    elevation: 4,
   },
   menuItemContent: {
     flexDirection: "row",
@@ -784,79 +701,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
-    backgroundColor: '#FFF8E1',
     alignSelf: 'flex-start',
   },
   bestsellerText: {
     fontSize: 11,
     fontWeight: "700",
     marginLeft: 4,
-    color: '#FF8F00',
   },
   menuItemName: {
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 6,
   },
+  menuItemPrice: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 8,
+  },
   menuItemDescription: {
     fontSize: 14,
     lineHeight: 20,
     opacity: 0.8,
-    marginBottom: 8,
-  },
-  menuItemMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
-  },
-  spiceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  spiceText: {
-    fontSize: 12,
-  },
-  spiceDots: {
-    flexDirection: "row",
-    gap: 2,
-  },
-  spiceDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  spiceDotActive: {
-    backgroundColor: '#FF6B35',
-  },
-  spiceDotInactive: {
-    backgroundColor: '#E0E0E0',
-  },
-  menuItemPrice: {
-    fontSize: 20,
-    fontWeight: "bold",
   },
   menuItemAction: {
     alignItems: "center",
     justifyContent: "space-between",
   },
-  imageContainer: {
-    position: 'relative',
-  },
   menuItemImage: {
     width: 100,
     height: 100,
     borderRadius: 16,
-  },
-  imageGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 40,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
   },
   menuItemImagePlaceholder: {
     width: 100,
@@ -889,13 +763,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   addButton: {
-    flexDirection: "row",
-    alignItems: "center",
     borderRadius: 25,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 12,
-    gap: 6,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -923,17 +793,18 @@ const styles = StyleSheet.create({
     bottom: 25,
     left: 20,
     right: 20,
-    borderRadius: 25,
+    borderRadius: 20,
     overflow: 'hidden',
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 12 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 16,
+    shadowRadius: 16,
+    elevation: 12,
+    zIndex: 99,
   },
   cartGradient: {
     padding: 20,
-    borderRadius: 25,
+    borderRadius: 20,
   },
   cartContent: {
     flexDirection: "row",
@@ -941,9 +812,9 @@ const styles = StyleSheet.create({
   },
   cartBadgeFloating: {
     backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 16,
-    width: 32,
-    height: 32,
+    borderRadius: 12,
+    width: 28,
+    height: 28,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -952,21 +823,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cartCount: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#fff",
-    fontWeight: "bold",
+    opacity: 0.9,
   },
-  cartSubtext: {
-    fontSize: 12,
+  cartTotal: {
+    fontSize: 18,
+    fontWeight: "bold",
     color: "#fff",
-    opacity: 0.8,
     marginTop: 2,
   },
   viewCartButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 16,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },

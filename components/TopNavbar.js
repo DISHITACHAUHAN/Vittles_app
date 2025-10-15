@@ -74,22 +74,7 @@ export default function TopNavbar({
             <Text style={[styles.orderText, { color: "#FFFFFF" }]}>
               Don't wait! Order your food
             </Text>
-          </View>
-
-          {/* Right Section - Notifications & Profile */}
-          <View style={styles.rightSection}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Profile")}
-              style={styles.profileButton}
-            >
-              {/* Changed to common avatar */}
-              <View style={[styles.commonAvatar, { borderColor: "#FFFFFF" }]}>
-                <Ionicons name="person" size={20} color="#FFFFFF" />
-              </View>
-            </TouchableOpacity>
-
-            
-          </View>
+          </View>          
         </View>
       </LinearGradient>
 

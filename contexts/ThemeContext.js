@@ -20,11 +20,11 @@ export const ThemeProvider = ({ children }) => {
   // Color schemes
   const lightColors = {
     // Primary colors
-    primary: '#00a850',
+    primary: '#8B3358',
     primaryGradient: ['#8B3358', '#670D2F', '#3A081C'], // Burgundy gradient for navbars
     
     // Background colors
-    background: '#ffffff',
+     background: '#f4f4f4',
     card: '#ffffff',
     tabBar: '#ffffff',
     

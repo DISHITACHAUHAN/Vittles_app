@@ -15,7 +15,7 @@ export default function SearchBar({
   onSearchChange, 
   onClearSearch,
   compact = false,
-  placeholder = "Search Restaurants",
+  placeholder = "Search Eateries",
   autoFocus = false,
   onSubmitEditing,
   style,
@@ -109,19 +109,7 @@ export default function SearchBar({
         {...props}
       />
       
-      {searchQuery ? (
-        <TouchableOpacity 
-          onPress={handleClearSearch} 
-          style={styles.clearButton}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons 
-            name="close-circle" 
-            size={responsiveSize.iconSize} 
-            color={colors.textSecondary} 
-          />
-        </TouchableOpacity>
-      ) : null}
+      
     </View>
   );
 }

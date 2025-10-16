@@ -13,10 +13,22 @@ import { useTheme } from '../contexts/ThemeContext'; // Import theme hook
 const RestaurantCard = ({ restaurant }) => {
   const navigation = useNavigation();
   const { colors } = useTheme(); // Get theme colors
+  const [imageError, setImageError] = React.useState(false);
 
   const handlePress = () => {
     navigation.navigate('RestaurantDetails', { restaurant });
   };
+
+  // Handle image error
+  const handleImageError = () => {
+    console.log('Image failed to load:', restaurant.image);
+    setImageError(true);
+  };
+
+  // Reset error state when restaurant changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [restaurant.image]);
 
   // Render rating badge
   const renderRatingBadge = () => (
@@ -28,6 +40,7 @@ const RestaurantCard = ({ restaurant }) => {
 
   // Render image with overlay
   const renderImage = () => {
+    // If image is an emoji or not a valid URL, use emoji container
     if (restaurant.image && typeof restaurant.image === 'string' && !restaurant.image.startsWith('http')) {
       return (
         <View style={styles.imageContainer}>
@@ -38,22 +51,24 @@ const RestaurantCard = ({ restaurant }) => {
         </View>
       );
     }
+
+    // Use fallback image if there's an error or no image
+    const imageUri = imageError || !restaurant.image 
+      ? 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'
+      : restaurant.image;
+
     return (
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: restaurant.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400' }}
+          source={{ uri: imageUri }}
           style={styles.restaurantImage}
           resizeMode="cover"
+          onError={handleImageError}
+          onLoadStart={() => console.log('Starting to load image:', imageUri)}
+          onLoadEnd={() => console.log('Finished loading image:', imageUri)}
         />
         {renderRatingBadge()}
-        {restaurant.isPureVeg && (
-          <View style={[styles.vegBadge, { 
-            backgroundColor: colors.isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.95)',
-            borderColor: '#4CAF50' 
-          }]}>
-            <Text style={styles.vegText}>🟢 Pure Veg</Text>
-          </View>
-        )}
+        
       </View>
     );
   };
@@ -80,6 +95,17 @@ const RestaurantCard = ({ restaurant }) => {
     );
   };
 
+  // Debug restaurant data
+  React.useEffect(() => {
+    console.log('Restaurant data:', {
+      name: restaurant.name,
+      image: restaurant.image,
+      imageType: typeof restaurant.image,
+      hasImage: !!restaurant.image,
+      isHttpUrl: restaurant.image && typeof restaurant.image === 'string' ? restaurant.image.startsWith('http') : false
+    });
+  }, [restaurant]);
+
   return (
     <TouchableOpacity style={[styles.card, { backgroundColor: colors.card }]} onPress={handlePress}>
       {renderImage()}
@@ -102,21 +128,7 @@ const RestaurantCard = ({ restaurant }) => {
         </View>
         
         <View style={styles.footer}>
-          {/* {renderDeliveryChip()} */}
-          {/* {renderDiscountBadge()} */}
         </View>
-        
-        {restaurant.noPackagingCharges && (
-          <View style={[styles.offerContainer, { 
-            backgroundColor: colors.isDark ? 'rgba(0, 168, 80, 0.1)' : '#FFF8F6',
-            borderLeftColor: colors.primary 
-          }]}>
-            <Ionicons name="leaf-outline" size={12} color={colors.primary} />
-            <Text style={[styles.offerText, { color: colors.primary }]}>
-              No packaging charges
-            </Text>
-          </View>
-        )}
       </View>
     </TouchableOpacity>
   );
@@ -132,13 +144,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     overflow: 'hidden',
+    width: '100%', // Ensure full width
   },
   imageContainer: {
     position: 'relative',
+    width: '100%',
+    height: 160,
+    backgroundColor: '#f0f0f0', // Fallback background color
   },
   restaurantImage: {
     width: '100%',
-    height: 160,
+    height: '100%',
+    backgroundColor: '#f0f0f0', // Show background while loading
   },
   emojiContainer: {
     width: '100%',

@@ -26,30 +26,10 @@ export default function SettingsScreen() {
       icon: isDark ? "moon" : "sunny",
       description: "Switch between light and dark theme"
     },
-    { 
-      key: "biometric", 
-      label: "Biometric Login", 
-      icon: "finger-print-outline",
-      description: "Use fingerprint or face ID"
-    },
-    { 
-      key: "location", 
-      label: "Location Services", 
-      icon: "location-outline",
-      description: "Allow location access"
-    },
-    { 
-      key: "autoUpdate", 
-      label: "Auto Update", 
-      icon: "refresh-outline",
-      description: "Automatically update app"
-    },
   ];
 
   const actionItems = [
-    { label: "Change Language", icon: "language-outline", onPress: () => {} },
-    { label: "Clear Cache", icon: "trash-outline", onPress: () => {} },
-    { label: "App Version", icon: "information-circle-outline", onPress: () => {}, value: "1.0.0" },
+   
   ];
 
   const handleSettingToggle = (key) => {
@@ -111,10 +91,6 @@ export default function SettingsScreen() {
             </View>
           ))}
 
-          <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>
-            More Options
-          </Text>
-          
           {actionItems.map((item, index) => (
             <TouchableOpacity 
               key={index} 

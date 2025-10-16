@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   Image
 } from "react-native";
-import { useTheme } from "../contexts/ThemeContext"; // Import theme hook
+import { useTheme } from "../contexts/ThemeContext";
 import one from '../assets/1.png';
-import two from '../assets/2.png'; // Add your other local images
+import two from '../assets/2.png';
 import three from '../assets/3.png';
 import four from '../assets/4.png';
 
@@ -38,29 +38,44 @@ export default function ImageCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef();
   const autoScrollTimer = useRef(null);
-  const { colors } = useTheme(); // Get theme colors
+  const { colors, isDark } = useTheme();
 
   useEffect(() => {
-    const startAutoScroll = () => {
-      autoScrollTimer.current = setInterval(() => {
-        const nextIndex = (activeIndex + 1) % data.length;
-        flatListRef.current?.scrollToIndex({
-          index: nextIndex,
-          animated: true
-        });
-        setActiveIndex(nextIndex);
-      }, 4000);
-    };
-
-    const stopAutoScroll = () => {
+    startAutoScroll();
+    
+    return () => {
       if (autoScrollTimer.current) {
         clearInterval(autoScrollTimer.current);
       }
     };
+  }, []);
 
-    startAutoScroll();
-    return () => stopAutoScroll();
+  // Reset timer when activeIndex changes
+  useEffect(() => {
+    restartAutoScroll();
   }, [activeIndex]);
+
+  const startAutoScroll = () => {
+    autoScrollTimer.current = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % data.length;
+      scrollToIndex(nextIndex);
+    }, 3000);
+  };
+
+  const restartAutoScroll = () => {
+    if (autoScrollTimer.current) {
+      clearInterval(autoScrollTimer.current);
+    }
+    startAutoScroll();
+  };
+
+  const scrollToIndex = (index) => {
+    flatListRef.current?.scrollToIndex({
+      index,
+      animated: true
+    });
+    setActiveIndex(index);
+  };
 
   const handleScroll = (event) => {
     const slide = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -70,20 +85,8 @@ export default function ImageCarousel() {
   };
 
   const handleManualScroll = (index) => {
-    if (autoScrollTimer.current) {
-      clearInterval(autoScrollTimer.current);
-    }
-    
-    flatListRef.current?.scrollToIndex({ index, animated: true });
-    setActiveIndex(index);
-    
-    setTimeout(() => {
-      autoScrollTimer.current = setInterval(() => {
-        const nextIndex = (activeIndex + 1) % data.length;
-        flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-        setActiveIndex(nextIndex);
-      }, 4000);
-    }, 6000);
+    scrollToIndex(index);
+    // Auto-scroll will automatically restart due to useEffect
   };
 
   const renderItem = ({ item }) => (
@@ -95,6 +98,13 @@ export default function ImageCarousel() {
       />
     </View>
   );
+
+  const getDotColor = (index) => {
+    if (index === activeIndex) {
+      return colors.primary || "#8B3358";
+    }
+    return isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)';
+  };
 
   return (
     <View style={styles.container}>
@@ -117,6 +127,7 @@ export default function ImageCarousel() {
           offset: width * index,
           index,
         })}
+        initialScrollIndex={0}
       />
 
       <View style={styles.dotsContainer}>
@@ -130,7 +141,7 @@ export default function ImageCarousel() {
               style={[
                 styles.dot,
                 { 
-                  backgroundColor: i === activeIndex ? colors.primary : colors.isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
+                  backgroundColor: getDotColor(i),
                   width: i === activeIndex ? 20 : 8,
                 },
               ]}
@@ -144,12 +155,12 @@ export default function ImageCarousel() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
+    marginTop: 1,
     marginBottom: 30,
     height: 250,
   },
   imageContainer: {
-    width: width, // Full screen width
+    width: width,
     height: 220,
   },
   image: {
@@ -167,6 +178,5 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     marginHorizontal: 4,
-    transition: 'all 0.3s ease', // Smooth transition for dot width changes
   },
 });

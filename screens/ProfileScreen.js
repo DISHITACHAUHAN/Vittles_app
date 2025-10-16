@@ -43,11 +43,11 @@ export default function ProfileScreen({ navigation }) {
       title: "Order History",
       onPress: () => navigation.navigate("Account", { screen: "OrderHistory" })
     },
-    {
-      icon: "star-outline",
-      title: "My Reviews",
-      onPress: () => navigation.navigate("Account", { screen: "MyReviews" })
-    },
+    // {
+    //   icon: "star-outline",
+    //   title: "My Reviews",
+    //   onPress: () => navigation.navigate("Account", { screen: "MyReviews" })
+    // },
     {
       icon: "settings-outline",
       title: "Settings",

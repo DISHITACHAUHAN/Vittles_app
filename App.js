@@ -44,7 +44,8 @@ const verticalScale = (size) => (height / 812) * size;
 // Vendor email list - add all vendor emails here
 const VENDOR_EMAILS = [
   'himanshu.vittles@gmail.com',
-  'hi@gmail.com'
+  'hi@gmail.com',
+  'saranshrana@gmail.com'
   // Add more vendor emails as needed
 ];
 
@@ -134,6 +135,7 @@ const MainTabs = () => {
           <>
             <Tab.Screen name="Vendor" component={VendorDashboard} />
             <Tab.Screen name="Menu" component={VendorMenu} />
+            <Tab.Screen name="Account" component={ProfileStack} />
           </>
         ) : (
           // Regular user tabs

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,12 @@ import {
   Keyboard,
   ScrollView,
   StatusBar,
+  ActivityIndicator
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useTheme } from "../contexts/ThemeContext"; // Import theme hook
+import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
+import { getVendorMenu, addMenuItem, updateMenuItemAvailability, deleteMenuItem } from "../api";
 
 export default function VendorMenu() {
   const [menu, setMenu] = useState([
@@ -25,64 +28,186 @@ export default function VendorMenu() {
   const [newItem, setNewItem] = useState({ name: "", price: "", category: "", description: "" });
   const [activeCategory, setActiveCategory] = useState("All");
   const [categories, setCategories] = useState(["All", "Burgers", "Pizzas", "Sides", "Beverages", "Desserts"]);
-  const { colors } = useTheme(); // Get theme colors
+  const { colors } = useTheme();
 
-  const addItem = () => {
+  // ADDED: API integration
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const vendorId = user?.id;
+
+  // ADDED: Fetch menu from API
+  useEffect(() => {
+    if (vendorId) {
+      fetchMenuFromAPI();
+    }
+  }, [vendorId]);
+
+  const fetchMenuFromAPI = async () => {
+    try {
+      setIsLoading(true);
+      const apiMenu = await getVendorMenu(vendorId);
+      if (apiMenu && Array.isArray(apiMenu)) {
+        const transformedMenu = apiMenu.map(item => ({
+          id: item.id?.toString() || item._id?.toString() || Math.random().toString(),
+          name: item.itemName || item.name || "Unnamed Item",
+          price: item.price?.toString() || "0",
+          available: item.available === 1 || item.available === true, // Handle bit(1) from database
+          category: item.category || "Uncategorized",
+          description: item.description || "No description available"
+        }));
+        setMenu(transformedMenu);
+        updateCategoriesList(transformedMenu);
+      }
+    } catch (error) {
+      console.error('Error fetching menu:', error);
+      // Keep default menu items if API fails
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateCategoriesList = (menuItems) => {
+    const uniqueCategories = ["All", ...new Set(menuItems.map(item => item.category).filter(Boolean))];
+    setCategories(uniqueCategories);
+  };
+
+  // UPDATED: addItem with API integration
+  const addItem = async () => {
     if (!newItem.name.trim() || !newItem.price.trim()) {
       Alert.alert("Missing Information", "Please fill in all required fields");
       return;
     }
-    
+
     if (isNaN(newItem.price) || parseFloat(newItem.price) <= 0) {
       Alert.alert("Invalid Price", "Please enter a valid price");
       return;
     }
 
-    // Determine category - use input or default to "Uncategorized"
     const itemCategory = newItem.category.trim() || "Uncategorized";
-    
-    // Add new category to categories list if it doesn't exist and it's not "Uncategorized"
+
     if (itemCategory !== "Uncategorized" && !categories.includes(itemCategory)) {
       setCategories(prevCategories => [...prevCategories, itemCategory]);
     }
 
-    setMenu([
-      ...menu,
-      { 
-        id: Date.now().toString(), 
-        name: newItem.name.trim(), 
-        price: newItem.price, 
-        category: itemCategory,
-        description: newItem.description.trim() || "No description available",
-        available: true 
-      },
-    ]);
+    // ADDED: API integration
+    if (vendorId) {
+      try {
+        setIsAdding(true);
+        const menuItemData = {
+          name: newItem.name.trim(),
+          price: parseFloat(newItem.price),
+          category: itemCategory,
+          description: newItem.description.trim() || "No description available",
+          available: true
+        };
+
+        const response = await addMenuItem(vendorId, menuItemData);
+
+        const newMenuItem = {
+          id: response.id?.toString() || response.insertId?.toString() || Date.now().toString(),
+          name: newItem.name.trim(),
+          price: newItem.price,
+          category: itemCategory,
+          description: newItem.description.trim() || "No description available",
+          available: true
+        };
+
+        setMenu([
+          ...menu,
+          newMenuItem,
+        ]);
+
+        Alert.alert("Success", "Menu item added successfully!");
+      } catch (error) {
+        console.error('Error adding menu item:', error);
+        Alert.alert("Error", "Failed to add menu item to server");
+        const fallbackItem = {
+          id: Date.now().toString(),
+          name: newItem.name.trim(),
+          price: newItem.price,
+          category: itemCategory,
+          description: newItem.description.trim() || "No description available",
+          available: true
+        };
+        setMenu([...menu, fallbackItem]);
+      } finally {
+        setIsAdding(false);
+      }
+    } else {
+      setMenu([
+        ...menu,
+        {
+          id: Date.now().toString(),
+          name: newItem.name.trim(),
+          price: newItem.price,
+          category: itemCategory,
+          description: newItem.description.trim() || "No description available",
+          available: true
+        },
+      ]);
+    }
+
     setNewItem({ name: "", price: "", category: "", description: "" });
     Keyboard.dismiss();
   };
 
-  const toggleAvailability = (id) => {
-    setMenu(
-      menu.map((item) =>
-        item.id === id ? { ...item, available: !item.available } : item
-      )
-    );
+  // UPDATED: toggleAvailability with proper database sync
+  const toggleAvailability = async (id) => {
+    const item = menu.find(item => item.id === id);
+    if (!item) return;
+
+    const newAvailability = !item.available;
+
+    // ADDED: API integration with database sync
+    if (vendorId) {
+      try {
+        await updateMenuItemAvailability(vendorId, id, newAvailability);
+
+        // Update local state only after successful API call
+        setMenu(
+          menu.map((item) =>
+            item.id === id ? { ...item, available: newAvailability } : item
+          )
+        );
+      } catch (error) {
+        console.error('Error updating availability:', error);
+        Alert.alert("Error", "Failed to update availability on server");
+      }
+    } else {
+      // Fallback to local state only
+      setMenu(
+        menu.map((item) =>
+          item.id === id ? { ...item, available: newAvailability } : item
+        )
+      );
+    }
   };
 
+  // UPDATED: deleteItem with API integration
   const deleteItem = (id) => {
     const itemToDelete = menu.find(item => item.id === id);
-    
+
     Alert.alert(
       "Delete Menu Item",
       `Are you sure you want to delete "${itemToDelete?.name}"? This action cannot be undone.`,
       [
         { text: "Keep Item", style: "cancel" },
-        { 
-          text: "Delete", 
+        {
+          text: "Delete",
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
+            // ADDED: API integration
+            if (vendorId) {
+              try {
+                await deleteMenuItem(vendorId, id);
+              } catch (error) {
+                console.error('Error deleting menu item:', error);
+                Alert.alert("Error", "Failed to delete menu item from server");
+              }
+            }
+
             setMenu(menu.filter((item) => item.id !== id));
-            // Check if we should remove the category if no items left in it
             setTimeout(() => updateCategories(), 100);
           }
         },
@@ -96,8 +221,8 @@ export default function VendorMenu() {
     setCategories(menuCategories);
   };
 
-  const filteredMenu = activeCategory === "All" 
-    ? menu 
+  const filteredMenu = activeCategory === "All"
+    ? menu
     : menu.filter(item => item.category === activeCategory);
 
   const getCategoryStats = () => {
@@ -110,10 +235,20 @@ export default function VendorMenu() {
 
   const categoryStats = getCategoryStats();
 
+  // ADDED: Loading state
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 10 }]}>Loading menu...</Text>
+      </View>
+    );
+  }
+
   const renderMenuItem = ({ item }) => (
-    <View style={[styles.menuCard, { 
+    <View style={[styles.menuCard, {
       backgroundColor: colors.card,
-      borderLeftColor: colors.primary 
+      borderLeftColor: colors.primary
     }]}>
       <View style={styles.itemHeader}>
         <View style={styles.itemMainInfo}>
@@ -122,15 +257,15 @@ export default function VendorMenu() {
             <Text style={[styles.itemCategory, { color: colors.textSecondary }]}>{item.category}</Text>
           </View>
         </View>
-        <View style={[styles.priceContainer, { 
-          backgroundColor: colors.isDark ? 'rgba(220, 38, 38, 0.2)' : '#fef2f2' 
+        <View style={[styles.priceContainer, {
+          backgroundColor: colors.isDark ? 'rgba(220, 38, 38, 0.2)' : '#fef2f2'
         }]}>
           <Text style={[styles.itemPrice, { color: colors.primary }]}>₹{item.price}</Text>
         </View>
       </View>
-      
+
       <Text style={[styles.itemDescription, { color: colors.textSecondary }]}>{item.description}</Text>
-      
+
       <View style={styles.itemFooter}>
         <View style={styles.statusContainer}>
           <View style={[
@@ -145,14 +280,14 @@ export default function VendorMenu() {
             {item.available ? "Available" : "Out of Stock"}
           </Text>
         </View>
-        
+
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={[
               styles.actionBtn,
               item.available ? styles.makeUnavailableBtn : styles.makeAvailableBtn,
-              { 
-                backgroundColor: item.available 
+              {
+                backgroundColor: item.available
                   ? (colors.isDark ? 'rgba(220, 38, 38, 0.2)' : '#fef2f2')
                   : (colors.isDark ? 'rgba(22, 163, 74, 0.2)' : '#f0fdf4'),
                 borderColor: item.available ? colors.error : '#16a34a'
@@ -167,11 +302,11 @@ export default function VendorMenu() {
               {item.available ? "Mark Unavailable" : "Mark Available"}
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
-            style={[styles.deleteActionBtn, { 
+            style={[styles.deleteActionBtn, {
               backgroundColor: colors.isDark ? 'rgba(220, 38, 38, 0.2)' : '#fef2f2',
-              borderColor: colors.error 
+              borderColor: colors.error
             }]}
             onPress={() => deleteItem(item.id)}
           >
@@ -184,16 +319,16 @@ export default function VendorMenu() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar 
-        barStyle="light-content" 
-        backgroundColor="#8B3358" 
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#8B3358"
       />
-      
+
       {/* Header with LinearGradient */}
       <LinearGradient
         colors={["#8B3358", "#670D2F", "#3A081C"]}
-        start={{ x: 0, y: 1 }}   // bottom-left
-        end={{ x: 1, y: 0 }}     // top-right
+        start={{ x: 0, y: 1 }}
+        end={{ x: 1, y: 0 }}
         style={styles.header}
       >
         <View style={styles.headerContent}>
@@ -235,10 +370,10 @@ export default function VendorMenu() {
                 placeholderTextColor={colors.textSecondary}
                 value={newItem.name}
                 onChangeText={(text) => setNewItem({ ...newItem, name: text })}
-                style={[styles.formInput, { 
+                style={[styles.formInput, {
                   backgroundColor: colors.background,
                   borderColor: colors.border,
-                  color: colors.text 
+                  color: colors.text
                 }]}
               />
               <TextInput
@@ -247,24 +382,24 @@ export default function VendorMenu() {
                 keyboardType="numeric"
                 value={newItem.price}
                 onChangeText={(text) => setNewItem({ ...newItem, price: text })}
-                style={[styles.formInput, { 
+                style={[styles.formInput, {
                   backgroundColor: colors.background,
                   borderColor: colors.border,
-                  color: colors.text 
+                  color: colors.text
                 }]}
               />
             </View>
-            
+
             <View style={styles.categoryInputContainer}>
               <TextInput
                 placeholder="Category (type to create new)"
                 placeholderTextColor={colors.textSecondary}
                 value={newItem.category}
                 onChangeText={(text) => setNewItem({ ...newItem, category: text })}
-                style={[styles.fullWidthInput, { 
+                style={[styles.fullWidthInput, {
                   backgroundColor: colors.background,
                   borderColor: colors.border,
-                  color: colors.text 
+                  color: colors.text
                 }]}
               />
               {newItem.category.trim() && !categories.includes(newItem.category.trim()) && (
@@ -273,36 +408,40 @@ export default function VendorMenu() {
                 </Text>
               )}
             </View>
-            
+
             <TextInput
               placeholder="Description"
               placeholderTextColor={colors.textSecondary}
               value={newItem.description}
               onChangeText={(text) => setNewItem({ ...newItem, description: text })}
-              style={[styles.descriptionInput, { 
+              style={[styles.descriptionInput, {
                 backgroundColor: colors.background,
                 borderColor: colors.border,
-                color: colors.text 
+                color: colors.text
               }]}
               multiline
               numberOfLines={2}
             />
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[
                 styles.addButton,
                 { backgroundColor: colors.primary },
-                (!newItem.name.trim() || !newItem.price.trim()) && styles.addButtonDisabled
-              ]} 
+                (!newItem.name.trim() || !newItem.price.trim() || isAdding) && styles.addButtonDisabled
+              ]}
               onPress={addItem}
-              disabled={!newItem.name.trim() || !newItem.price.trim()}
+              disabled={!newItem.name.trim() || !newItem.price.trim() || isAdding}
             >
-              <Text style={styles.addButtonText}>
-                {newItem.category.trim() && !categories.includes(newItem.category.trim()) 
-                  ? "+ Add Item & Create Category" 
-                  : "+ Add to Menu"
-                }
-              </Text>
+              {isAdding ? (
+                <ActivityIndicator color="#ffffff" size="small" />
+              ) : (
+                <Text style={styles.addButtonText}>
+                  {newItem.category.trim() && !categories.includes(newItem.category.trim())
+                    ? "+ Add Item & Create Category"
+                    : "+ Add to Menu"
+                  }
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -321,9 +460,9 @@ export default function VendorMenu() {
                 key={category}
                 style={[
                   styles.categoryChip,
-                  { 
+                  {
                     backgroundColor: colors.card,
-                    borderColor: colors.border 
+                    borderColor: colors.border
                   },
                   activeCategory === category && [
                     styles.activeCategoryChip,
@@ -342,9 +481,9 @@ export default function VendorMenu() {
                 {category !== "All" && (
                   <Text style={[
                     styles.categoryCount,
-                    { 
+                    {
                       backgroundColor: colors.isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9',
-                      color: colors.textSecondary 
+                      color: colors.textSecondary
                     },
                     activeCategory === category && [
                       styles.activeCategoryCount,
@@ -367,8 +506,8 @@ export default function VendorMenu() {
               <Text style={[styles.itemCount, { color: colors.primary }]}> ({filteredMenu.length})</Text>
             </Text>
             <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
-              {activeCategory === "All" 
-                ? "All categories" 
+              {activeCategory === "All"
+                ? "All categories"
                 : `${filteredMenu.length} item${filteredMenu.length !== 1 ? 's' : ''} in this category`
               }
             </Text>
@@ -381,8 +520,8 @@ export default function VendorMenu() {
                 {activeCategory === "All" ? "No items in menu" : `No items in ${activeCategory}`}
               </Text>
               <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
-                {activeCategory === "All" 
-                  ? "Add your first menu item to get started!" 
+                {activeCategory === "All"
+                  ? "Add your first menu item to get started!"
                   : `Add items to the ${activeCategory} category`}
               </Text>
             </View>
@@ -402,8 +541,9 @@ export default function VendorMenu() {
   );
 }
 
+// COMPLETE STYLES OBJECT
 const styles = StyleSheet.create({
-  container: { 
+  container: {
     flex: 1,
   },
   header: {
@@ -421,8 +561,8 @@ const styles = StyleSheet.create({
   headerContent: {
     marginBottom: 15,
   },
-  title: { 
-    fontSize: 24, 
+  title: {
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 4,
     color: '#FFF',

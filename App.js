@@ -41,6 +41,14 @@ const isTablet = width >= 768;
 const scale = (size) => (width / 375) * size;
 const verticalScale = (size) => (height / 812) * size;
 
+// Vendor email list - add all vendor emails here
+const VENDOR_EMAILS = [
+  'himanshu.vittles@gmail.com',
+  'hi@gmail.com',
+  'saranshrana@gmail.com'
+  // Add more vendor emails as needed
+];
+
 // Floating Cart Button
 const FloatingCartButton = () => {
   const { totalItems } = useCart();
@@ -75,6 +83,10 @@ const FloatingCartButton = () => {
 const MainTabs = () => {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { user } = useAuth(); // Get the current user
+
+  // Check if the current user is a vendor
+  const isVendor = VENDOR_EMAILS.includes(user?.email);
 
   const tabBarStyle = {
     backgroundColor: colors.tabBar,
@@ -118,13 +130,23 @@ const MainTabs = () => {
           tabBarLabelStyle: { fontSize: isTablet ? 12 : 10, marginBottom: 2, fontWeight: '500' },
         })}
       >
-        <Tab.Screen name="Home" component={HomeStack} />
-        <Tab.Screen name="Alerts" component={AlertsScreen} />
-        <Tab.Screen name="Account" component={ProfileStack} />
-        <Tab.Screen name="Menu" component={VendorMenu} />
-        <Tab.Screen name="Vendor" component={VendorDashboard} />
+        {isVendor ? (
+          // Vendor-specific tabs
+          <>
+            <Tab.Screen name="Vendor" component={VendorDashboard} />
+            <Tab.Screen name="Menu" component={VendorMenu} />
+            <Tab.Screen name="Account" component={ProfileStack} />
+          </>
+        ) : (
+          // Regular user tabs
+          <>
+            <Tab.Screen name="Home" component={HomeStack} />
+            <Tab.Screen name="Alerts" component={AlertsScreen} />
+            <Tab.Screen name="Account" component={ProfileStack} />
+          </>
+        )}
       </Tab.Navigator>
-      <FloatingCartButton />
+      {!isVendor && <FloatingCartButton />}
     </View>
   );
 };
